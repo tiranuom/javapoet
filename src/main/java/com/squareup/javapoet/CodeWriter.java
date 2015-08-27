@@ -129,6 +129,17 @@ final class CodeWriter {
     }
   }
 
+  public void emitStaticImports(List<StaticImportSpec> staticImports) throws IOException {
+    if (!staticImports.isEmpty()) {
+      emit("\n");
+      for (StaticImportSpec staticImport : staticImports) {
+        staticImport.emit(this);
+        emit("\n");
+      }
+      emit("\n");
+    }
+  }
+
   public void emitJavadoc(CodeBlock javadocCodeBlock) throws IOException {
     if (javadocCodeBlock.isEmpty()) return;
 

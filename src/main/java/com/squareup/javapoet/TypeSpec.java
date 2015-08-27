@@ -55,6 +55,7 @@ public final class TypeSpec {
   public final List<MethodSpec> methodSpecs;
   public final List<TypeSpec> typeSpecs;
   public final List<Element> originatingElements;
+  public final List<StaticImportSpec> staticImports;
 
   private TypeSpec(Builder builder) {
     this.kind = builder.kind;
@@ -71,6 +72,7 @@ public final class TypeSpec {
     this.staticBlock = builder.staticBlock.build();
     this.methodSpecs = Util.immutableList(builder.methodSpecs);
     this.typeSpecs = Util.immutableList(builder.typeSpecs);
+    this.staticImports = Util.immutableList(builder.staticImportSpecs);
 
     List<Element> originatingElementsMutable = new ArrayList<>();
     originatingElementsMutable.addAll(builder.originatingElements);
@@ -130,6 +132,7 @@ public final class TypeSpec {
 
     try {
       if (enumName != null) {
+        codeWriter.emitStaticImports(staticImports);
         codeWriter.emitJavadoc(javadoc);
         codeWriter.emitAnnotations(annotations, false);
         codeWriter.emit("$L", enumName);
@@ -148,6 +151,7 @@ public final class TypeSpec {
         codeWriter.emit(anonymousTypeArguments);
         codeWriter.emit(") {\n");
       } else {
+        codeWriter.emitStaticImports(staticImports);
         codeWriter.emitJavadoc(javadoc);
         codeWriter.emitAnnotations(annotations, false);
         codeWriter.emitModifiers(modifiers, Util.union(implicitModifiers, kind.asMemberModifiers));
@@ -338,6 +342,7 @@ public final class TypeSpec {
     private final List<MethodSpec> methodSpecs = new ArrayList<>();
     private final List<TypeSpec> typeSpecs = new ArrayList<>();
     private final List<Element> originatingElements = new ArrayList<>();
+    private final List<StaticImportSpec> staticImportSpecs = new ArrayList<>();
 
     private Builder(Kind kind, String name,
         CodeBlock anonymousTypeArguments) {
@@ -345,6 +350,12 @@ public final class TypeSpec {
       this.kind = kind;
       this.name = name;
       this.anonymousTypeArguments = anonymousTypeArguments;
+    }
+
+    public Builder addStaticImport(StaticImportSpec staticImportSpec) {
+      checkNotNull(staticImportSpec, "staticImportSpec == null");
+      this.staticImportSpecs.add(staticImportSpec);
+      return this;
     }
 
     public Builder addJavadoc(String format, Object... args) {
